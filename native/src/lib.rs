@@ -1,5 +1,9 @@
 #[macro_use]
 extern crate neon;
+extern crate anymap;
+
+mod scene;
+mod intersectable;
 
 use neon::prelude::*;
 
