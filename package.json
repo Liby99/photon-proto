@@ -12,6 +12,6 @@
   },
   "scripts": {
     "start": "electron .",
-    "build": "electron-build-env neon build"
+    "build": "electron-build-env neon build --release"
   }
 }

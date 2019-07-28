@@ -4,8 +4,11 @@ const canvas = document.getElementById("main-canvas");
 const { width, height } = canvas;
 const context = canvas.getContext("2d");
 const imgData = context.createImageData(width, height);
-const imgBuffer = imgData.data;
 
-Photon.render({}, imgBuffer);
+Photon.fillBlack(imgData);
+
+context.putImageData(imgData, 0, 0);
+
+Photon.fillBlackJs(imgData);
 
 context.putImageData(imgData, 0, 0);
