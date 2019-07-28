@@ -1,0 +1,17 @@
+[package]
+name = "photon-proto"
+version = "0.1.0"
+authors = ["Liby Lee <liby99@icloud.com>"]
+license = "MIT"
+build = "build.rs"
+exclude = ["artifacts.json", "index.node"]
+
+[lib]
+name = "photon_proto"
+crate-type = ["dylib"]
+
+[build-dependencies]
+neon-build = "0.2.0"
+
+[dependencies]
+neon = "0.2.0"
