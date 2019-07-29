@@ -1,21 +1,4 @@
-use ::util::Vector3;
-
-pub struct Ray {
-  pub origin: Vector3,
-  pub direction: Vector3,
-}
-
-impl Ray {
-  pub fn point_at(&self, t: f32) -> Vector3 {
-    self.origin.clone() + self.direction.clone() * t
-  }
-}
-
-pub struct IntersectionInfo {
-  pub position: Vector3,
-  pub normal: Vector3,
-  pub t: f32,
-}
+use ::util::{Vector3, Ray, IntersectionInfo};
 
 pub trait Intersectable {
   fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo>;
@@ -33,24 +16,6 @@ impl Cube {
   }
 }
 
-pub struct Plane;
-
-impl Plane {
-  pub fn new() -> Self {
-    Self
-  }
-}
-
-pub struct Sphere {
-  pub radius: f32,
-}
-
-impl Sphere {
-  pub fn new(radius: f32) -> Self {
-    Self { radius }
-  }
-}
-
 impl Intersectable for Cube {
   fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
     let hx = self.size_x / 2.0;
@@ -58,8 +23,8 @@ impl Intersectable for Cube {
     let hz = self.size_z / 2.0;
     let min_corner = Vector3 { x: -hx, y: -hy, z: -hz };
     let max_corner = Vector3 { x: hx, y: hy, z: hz };
-    let t_min_tmp = (min_corner - ray.origin.clone()) / ray.direction.clone();
-    let t_max_tmp = (max_corner - ray.origin.clone()) / ray.direction.clone();
+    let t_min_tmp = (min_corner - ray.origin) / ray.direction;
+    let t_max_tmp = (max_corner - ray.origin) / ray.direction;
     let t_min_vec = t_min_tmp.min(&t_max_tmp);
     let t_max_vec = t_min_tmp.max(&t_max_tmp);
     let t_min = t_min_vec.x.max(t_min_vec.y).max(t_min_vec.z);
@@ -87,27 +52,11 @@ impl Intersectable for Cube {
   }
 }
 
-impl Intersectable for Sphere {
-  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
-    let a = ray.direction.dot(&ray.direction);
-    let b = 2.0 * ray.direction.dot(&ray.origin);
-    let c = ray.origin.dot(&ray.origin) - self.radius * self.radius;
-    let d = (b * b - 4.0 * a * c).sqrt();
-    let t1 = (-b + d) / (2.0 * a);
-    let t2 = (-b - d) / (2.0 * a);
-    let (t, sign) = if t1 > 0.0 && t2 > 0.0 {
-      (t1.min(t2), 1.0)
-    } else if t1 * t2 < 0.0 {
-      (t1.max(t2), -1.0)
-    } else {
-      return None
-    };
-    let position = ray.point_at(t);
-    Some(IntersectionInfo {
-      position: position.clone(),
-      normal: (position * sign).normalize(),
-      t: t,
-    })
+pub struct Plane;
+
+impl Plane {
+  pub fn new() -> Self {
+    Self
   }
 }
 
@@ -126,5 +75,39 @@ impl Intersectable for Plane {
     } else {
       None
     }
+  }
+}
+
+pub struct Sphere {
+  pub radius: f32,
+}
+
+impl Sphere {
+  pub fn new(radius: f32) -> Self {
+    Self { radius }
+  }
+}
+
+impl Intersectable for Sphere {
+  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
+    let a = ray.direction.dot(&ray.direction);
+    let b = 2.0 * ray.direction.dot(&ray.origin);
+    let c = ray.origin.dot(&ray.origin) - self.radius * self.radius;
+    let d = (b * b - 4.0 * a * c).sqrt();
+    let t1 = (-b + d) / (2.0 * a);
+    let t2 = (-b - d) / (2.0 * a);
+    let (t, sign) = if t1 > 0.0 && t2 > 0.0 {
+      (t1.min(t2), 1.0)
+    } else if t1 * t2 < 0.0 {
+      (t1.max(t2), -1.0)
+    } else {
+      return None
+    };
+    let position = ray.point_at(t);
+    Some(IntersectionInfo {
+      position: position,
+      normal: (position * sign).normalize(),
+      t: t,
+    })
   }
 }

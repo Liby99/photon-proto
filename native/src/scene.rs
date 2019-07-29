@@ -1,15 +1,15 @@
 use ::intersectable::Intersectable;
 
-pub struct Scene<T: Intersectable> {
-  pub objects: Vec<Box<T>>,
+pub struct Scene {
+  pub objects: Vec<Box<dyn Intersectable>>,
 }
 
-impl<T: Intersectable> Scene<T> {
+impl Scene {
   pub fn new() -> Self {
     Scene { objects: vec![] }
   }
 
-  pub fn add_object(&mut self, obj: T) {
-    self.objects.push(Box::new(obj));
-  }
+  // pub fn add_object<T: Intersectable>(&mut self, obj: T) {
+  //   self.objects.push(Box::new(obj));
+  // }
 }

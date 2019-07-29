@@ -8,9 +8,11 @@ mod intersectable;
 mod renderer;
 
 use neon::prelude::*;
+
+use util::ImageData;
 use scene::Scene;
-use intersectable::{Sphere};
-use renderer::{ImageData, RayTracer};
+use intersectable::{Sphere, Cube, Plane};
+use renderer::RayTracer;
 
 fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
@@ -29,8 +31,12 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let mut img_data = ImageData { width, height, buffer: &mut slice };
 
     // Create the scene
-    let mut scene = Scene::new();
-    scene.add_object(Sphere::new(1.0));
+    let mut scene = Scene {
+      objects: vec![
+        Box::new(Plane::new()),
+        Box::new(Sphere::new(1.0)),
+      ]
+    };
 
     // Render to image data
     RayTracer::render(&scene, &mut img_data);
