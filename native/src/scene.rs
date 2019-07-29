@@ -1,19 +1,15 @@
-use anymap::AnyMap;
+use ::intersectable::Intersectable;
 
-struct Entity {
-  pub components: AnyMap,
-  pub children: Vec<Entity>,
+pub struct Scene<T: Intersectable> {
+  pub objects: Vec<Box<T>>,
 }
 
-impl Entity {
+impl<T: Intersectable> Scene<T> {
   pub fn new() -> Self {
-    Entity {
-      components: AnyMap::new(),
-      children: vec![],
-    }
+    Scene { objects: vec![] }
   }
-}
 
-struct Scene {
-  pub root: Entity,
+  pub fn add_object(&mut self, obj: T) {
+    self.objects.push(Box::new(obj));
+  }
 }

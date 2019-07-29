@@ -8,6 +8,20 @@ pub struct Color {
   pub a: u8,
 }
 
+impl Color {
+  pub fn transparent() -> Color {
+    Color { r: 0, g: 0, b: 0, a: 0 }
+  }
+
+  pub fn white() -> Color {
+    Color { r: 255, g: 255, b: 255, a: 255 }
+  }
+
+  pub fn black() -> Color {
+    Color { r: 0, g: 0, b: 0, a: 255 }
+  }
+}
+
 #[derive(Clone)]
 pub struct Vector3 {
   pub x: f32,
@@ -136,4 +150,15 @@ impl Div<Vector3> for Vector3 {
       z: self.z / rhs.z,
     }
   }
+}
+
+pub struct Vector4 {
+  pub x: f32,
+  pub y: f32,
+  pub z: f32,
+  pub w: f32,
+}
+
+pub struct Matrix4 {
+
 }

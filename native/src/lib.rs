@@ -5,10 +5,37 @@ extern crate anymap;
 mod scene;
 mod util;
 mod intersectable;
+mod renderer;
 
 use neon::prelude::*;
+use scene::Scene;
+use intersectable::{Sphere};
+use renderer::{ImageData, RayTracer};
 
 fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+
+  let img_data: Handle<JsObject> = cx.argument::<JsObject>(0)?;
+  let width = img_data.get(&mut cx, "width")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
+  let height = img_data.get(&mut cx, "height")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
+  let mut buffer = img_data.get(&mut cx, "data")?.downcast::<JsBuffer>().unwrap_or(cx.buffer(0)?);
+  let buffer_length = buffer.get(&mut cx, "length")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
+
+  { // Tricks to get rid of borrow checker
+
+    // Setup image data
+    let guard = cx.lock();
+    let data = buffer.borrow_mut(&guard);
+    let mut slice = data.as_mut_slice::<u8>();
+    let mut img_data = ImageData { width, height, buffer: &mut slice };
+
+    // Create the scene
+    let mut scene = Scene::new();
+    scene.add_object(Sphere::new(1.0));
+
+    // Render to image data
+    RayTracer::render(&scene, &mut img_data);
+  }
+
   Ok(cx.undefined())
 }
 

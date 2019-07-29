@@ -18,7 +18,7 @@ pub struct IntersectionInfo {
 }
 
 pub trait Intersectable {
-  fn intersect(self, ray: &Ray) -> Option<IntersectionInfo>;
+  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo>;
 }
 
 pub struct Cube {
@@ -27,14 +27,32 @@ pub struct Cube {
   pub size_z: f32,
 }
 
-pub struct Sphere {
-  pub radius: f32,
+impl Cube {
+  pub fn new(size_x: f32, size_y: f32, size_z: f32) -> Cube {
+    Self { size_x, size_y, size_z }
+  }
 }
 
 pub struct Plane;
 
+impl Plane {
+  pub fn new() -> Self {
+    Self
+  }
+}
+
+pub struct Sphere {
+  pub radius: f32,
+}
+
+impl Sphere {
+  pub fn new(radius: f32) -> Self {
+    Self { radius }
+  }
+}
+
 impl Intersectable for Cube {
-  fn intersect(self, ray: &Ray) -> Option<IntersectionInfo> {
+  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
     let hx = self.size_x / 2.0;
     let hy = self.size_y / 2.0;
     let hz = self.size_z / 2.0;
@@ -70,7 +88,7 @@ impl Intersectable for Cube {
 }
 
 impl Intersectable for Sphere {
-  fn intersect(self, ray: &Ray) -> Option<IntersectionInfo> {
+  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
     let a = ray.direction.dot(&ray.direction);
     let b = 2.0 * ray.direction.dot(&ray.origin);
     let c = ray.origin.dot(&ray.origin) - self.radius * self.radius;
@@ -94,7 +112,7 @@ impl Intersectable for Sphere {
 }
 
 impl Intersectable for Plane {
-  fn intersect(self, ray: &Ray) -> Option<IntersectionInfo> {
+  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
     if ray.direction.y == 0.0 {
       return None;
     }
@@ -109,8 +127,4 @@ impl Intersectable for Plane {
       None
     }
   }
-}
-
-pub struct Renderable {
-  pub intersectable: Box<dyn Intersectable>,
 }

@@ -5,10 +5,6 @@ const { width, height } = canvas;
 const context = canvas.getContext("2d");
 const imgData = context.createImageData(width, height);
 
-Photon.fillBlack(imgData);
-
-context.putImageData(imgData, 0, 0);
-
-Photon.fillBlackJs(imgData);
+Photon.render(imgData);
 
 context.putImageData(imgData, 0, 0);
