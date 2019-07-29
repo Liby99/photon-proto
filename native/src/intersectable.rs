@@ -1,121 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div, Neg};
-
-#[derive(Clone)]
-pub struct Vector3 {
-  pub x: f32,
-  pub y: f32,
-  pub z: f32,
-}
-
-impl Vector3 {
-  pub fn zero() -> Vector3 {
-    Vector3 { x: 0.0, y: 0.0, z: 0.0 }
-  }
-
-  pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
-    Vector3 { x, y, z }
-  }
-
-  pub fn i() -> Vector3 {
-    Vector3 { x: 1.0, y: 0.0, z: 0.0 }
-  }
-
-  pub fn j() -> Vector3 {
-    Vector3 { x: 0.0, y: 1.0, z: 0.0 }
-  }
-
-  pub fn k() -> Vector3 {
-    Vector3 { x: 0.0, y: 0.0, z: 1.0 }
-  }
-
-  pub fn dot(&self, other: &Vector3) -> f32 {
-    self.x * other.x + self.y * other.y + self.z * other.z
-  }
-
-  pub fn max(&self, other: &Vector3) -> Vector3 {
-    Vector3 {
-      x: self.x.max(other.x),
-      y: self.y.max(other.y),
-      z: self.z.max(other.z),
-    }
-  }
-
-  pub fn min(&self, other: &Vector3) -> Vector3 {
-    Vector3 {
-      x: self.x.min(other.x),
-      y: self.y.min(other.y),
-      z: self.z.min(other.z),
-    }
-  }
-}
-
-impl Neg for Vector3 {
-  type Output = Self;
-
-  fn neg(self) -> Self {
-    Vector3 { x: -self.x, y: -self.y, z: -self.z }
-  }
-}
-
-impl Add<Vector3> for Vector3 {
-  type Output = Self;
-
-  fn add(self, rhs: Self) -> Self {
-    Self {
-      x: self.x + rhs.x,
-      y: self.y + rhs.y,
-      z: self.z + rhs.z,
-    }
-  }
-}
-
-impl Sub<Vector3> for Vector3 {
-  type Output = Self;
-
-  fn sub(self, rhs: Self) -> Self {
-    Self {
-      x: self.x - rhs.x,
-      y: self.y - rhs.y,
-      z: self.z - rhs.z,
-    }
-  }
-}
-
-impl Mul<f32> for Vector3 {
-  type Output = Self;
-
-  fn mul(self, rhs: f32) -> Self {
-    Self {
-      x: self.x * rhs,
-      y: self.y * rhs,
-      z: self.z * rhs,
-    }
-  }
-}
-
-impl Div<f32> for Vector3 {
-  type Output = Self;
-
-  fn div(self, rhs: f32) -> Self {
-    Self {
-      x: self.x / rhs,
-      y: self.y / rhs,
-      z: self.z / rhs,
-    }
-  }
-}
-
-impl Div<Vector3> for Vector3 {
-  type Output = Self;
-
-  fn div(self, rhs: Vector3) -> Self {
-    Self {
-      x: self.x / rhs.x,
-      y: self.y / rhs.y,
-      z: self.z / rhs.z,
-    }
-  }
-}
+use ::util::Vector3;
 
 pub struct Ray {
   pub origin: Vector3,
@@ -139,8 +22,8 @@ pub trait Intersectable {
 }
 
 pub struct Cube {
-  pub size_x: f32, // x
-  pub size_y: f32, // y
+  pub size_x: f32,
+  pub size_y: f32,
   pub size_z: f32,
 }
 
@@ -194,27 +77,39 @@ impl Intersectable for Sphere {
     let d = (b * b - 4.0 * a * c).sqrt();
     let t1 = (-b + d) / (2.0 * a);
     let t2 = (-b - d) / (2.0 * a);
-    let t = if t1 > 0.0 && t2 > 0.0 {
-      t1.min(t2)
+    let (t, sign) = if t1 > 0.0 && t2 > 0.0 {
+      (t1.min(t2), 1.0)
     } else if t1 * t2 < 0.0 {
-      t1.max(t2)
+      (t1.max(t2), -1.0)
     } else {
       return None
     };
     let position = ray.point_at(t);
     Some(IntersectionInfo {
       position: position.clone(),
-      normal: position,
+      normal: (position * sign).normalize(),
       t: t,
     })
   }
 }
 
-// impl Intersectable for Plane {
-//   fn intersect(self, ray: &Ray) -> Option<IntersectionInfo> {
-
-//   }
-// }
+impl Intersectable for Plane {
+  fn intersect(self, ray: &Ray) -> Option<IntersectionInfo> {
+    if ray.direction.y == 0.0 {
+      return None;
+    }
+    let t = ray.origin.y / -ray.direction.y;
+    if t > 0.0 {
+      Some(IntersectionInfo {
+        position: ray.point_at(t),
+        normal: if ray.origin.y > 0.0 { Vector3::j() } else { -Vector3::j() },
+        t
+      })
+    } else {
+      None
+    }
+  }
+}
 
 pub struct Renderable {
   pub intersectable: Box<dyn Intersectable>,

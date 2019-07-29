@@ -3,6 +3,7 @@ extern crate neon;
 extern crate anymap;
 
 mod scene;
+mod util;
 mod intersectable;
 
 use neon::prelude::*;
