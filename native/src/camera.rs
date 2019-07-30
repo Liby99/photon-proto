@@ -22,12 +22,13 @@ impl Camera {
   }
 
   pub fn new_with_target(position: Vector3, target: Vector3) -> Self {
-    Self::new(position, (target - position).normalize())
+    Self::new(position, target - position)
   }
 
   pub fn rays<'a>(&'a self, width: usize, height: usize) -> CameraRays<'a> {
-    let u = self.forward.cross(self.up);
-    let v = self.forward.cross(u);
+    let w = self.forward; // front
+    let u = w.cross(self.up); // right
+    let v = u.cross(w); // up
     let b = -(self.fovy / 2.0).tan();
     let a = b * width as f32 / height as f32;
     let hw = width as f32 / 2.0;
@@ -90,11 +91,12 @@ impl<'a> Iterator for CameraRays<'a> {
 
     // Calculate ray
     let origin = self.camera.position;
-    let hor_dir = self.v * self.a * (new_i as f32 - self.hw) / self.hw;
-    let ver_dir = self.u * self.b * (new_j as f32 - self.hh) / self.hh;
-    let direction = (hor_dir + ver_dir).normalize();
+    let hor_dir = self.u * self.a * (new_i as f32 - self.hw) / self.hw;
+    let ver_dir = self.v * self.b * (new_j as f32 - self.hh) / self.hh;
+    let direction = (self.w + hor_dir + ver_dir).normalize();
     let ray = Ray::new(origin, direction);
 
+    // Has the next ray
     return Some((new_i, new_j, ray));
   }
 }

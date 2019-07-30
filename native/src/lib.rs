@@ -40,7 +40,7 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     };
 
     // Create the camera
-    let camera = Camera::new_with_target(Vector3::new(3.0, 3.0, 3.0), Vector3::zero());
+    let camera = Camera::new_with_target(Vector3::new(3.0, 0.3, 3.0), Vector3::zero());
 
     // Render to image data
     RayTracer::render(&scene, &camera, &mut img_data);
