@@ -35,22 +35,27 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     // Create the scene
     let scene = Scene {
       objects: vec![
-        // Box::new(Plane::new()),
-        // Box::new(Sphere::new(1.0)),
-        // Box::new(Cube::new(1.0, 1.0, 1.0)),
+        RenderObject {
+          transform: Transform {
+            position: Vector3::new(0.0, 0.15, 0.0),
+            scale: Vector3::new(1.0, 1.0, 1.0),
+            rotation: Quaternion::identity(),
+          },
+          intersectable: Box::new(Sphere::new(0.3))
+        },
         RenderObject {
           transform: Transform {
             position: Vector3::zero(),
-            scale: Vector3::new(1.0, 0.3, 1.0),
+            scale: Vector3::new(1.0, 1.0, 1.0),
             rotation: Quaternion::identity(),
           },
-          intersectable: Box::new(Sphere::new(1.0))
+          intersectable: Box::new(Plane::new())
         }
       ]
     };
 
     // Create the camera
-    let camera = Camera::new_with_target(Vector3::new(3.0, 0.7, 3.0), Vector3::zero());
+    let camera = Camera::new_with_target(Vector3::new(3.0, 0.2, 1.0), Vector3::zero());
 
     // Render to image data
     RayTracer::render(&scene, &camera, &mut img_data);

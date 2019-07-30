@@ -8,6 +8,33 @@ pub struct Color {
   pub a: u8,
 }
 
+fn f32_to_u8(num: f32) -> u8 {
+  let num = if num > 1.0 { 1.0 } else if num < 0.0 { 0.0 } else { num };
+  (num * 255.0) as u8
+}
+
+impl From<Vector4> for Color {
+  fn from(v: Vector4) -> Color {
+    Color {
+      r: f32_to_u8(v.x),
+      g: f32_to_u8(v.y),
+      b: f32_to_u8(v.z),
+      a: f32_to_u8(v.w),
+    }
+  }
+}
+
+impl From<Vector3> for Color {
+  fn from(v: Vector3) -> Color {
+    Color {
+      r: f32_to_u8(v.x),
+      g: f32_to_u8(v.y),
+      b: f32_to_u8(v.z),
+      a: 255,
+    }
+  }
+}
+
 impl Color {
   pub fn transparent() -> Color {
     Color { r: 0, g: 0, b: 0, a: 0 }
