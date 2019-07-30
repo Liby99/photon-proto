@@ -54,6 +54,14 @@ impl Vector3 {
     self.x * other.x + self.y * other.y + self.z * other.z
   }
 
+  pub fn cross(&self, other: Vector3) -> Vector3 {
+    Vector3 {
+      x: self.y * other.z - self.z * other.y,
+      y: self.z * other.x - self.x * other.z,
+      z: self.x * other.y - self.y * other.x,
+    }
+  }
+
   pub fn max(&self, other: &Vector3) -> Vector3 {
     Vector3 {
       x: self.x.max(other.x),
@@ -169,6 +177,10 @@ pub struct Ray {
 }
 
 impl Ray {
+  pub fn new(origin: Vector3, direction: Vector3) -> Ray {
+    Ray { origin, direction }
+  }
+
   pub fn point_at(&self, t: f32) -> Vector3 {
     self.origin.clone() + self.direction.clone() * t
   }

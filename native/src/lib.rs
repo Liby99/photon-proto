@@ -6,13 +6,15 @@ mod scene;
 mod util;
 mod intersectable;
 mod renderer;
+mod camera;
 
 use neon::prelude::*;
 
-use util::ImageData;
+use util::{Vector3, ImageData};
 use scene::Scene;
 use intersectable::{Sphere, Cube, Plane};
 use renderer::RayTracer;
+use camera::Camera;
 
 fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
@@ -20,7 +22,6 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
   let width = img_data.get(&mut cx, "width")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
   let height = img_data.get(&mut cx, "height")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
   let mut buffer = img_data.get(&mut cx, "data")?.downcast::<JsBuffer>().unwrap_or(cx.buffer(0)?);
-  let buffer_length = buffer.get(&mut cx, "length")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
 
   { // Tricks to get rid of borrow checker
 
@@ -31,15 +32,18 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let mut img_data = ImageData { width, height, buffer: &mut slice };
 
     // Create the scene
-    let mut scene = Scene {
+    let scene = Scene {
       objects: vec![
         Box::new(Plane::new()),
         Box::new(Sphere::new(1.0)),
       ]
     };
 
+    // Create the camera
+    let camera = Camera::new_with_target(Vector3::new(3.0, 3.0, 3.0), Vector3::zero());
+
     // Render to image data
-    RayTracer::render(&scene, &mut img_data);
+    RayTracer::render(&scene, &camera, &mut img_data);
   }
 
   Ok(cx.undefined())
