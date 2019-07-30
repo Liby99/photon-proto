@@ -1,12 +1,11 @@
 #[macro_use]
 extern crate neon;
-extern crate anymap;
 
-mod scene;
-mod util;
-mod intersectable;
-mod renderer;
-mod camera;
+pub mod scene;
+pub mod util;
+pub mod intersectable;
+pub mod renderer;
+pub mod camera;
 
 use neon::prelude::*;
 
@@ -36,11 +35,12 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
       objects: vec![
         Box::new(Plane::new()),
         Box::new(Sphere::new(1.0)),
+        Box::new(Cube::new(1.0, 1.0, 1.0)),
       ]
     };
 
     // Create the camera
-    let camera = Camera::new_with_target(Vector3::new(3.0, 0.3, 3.0), Vector3::zero());
+    let camera = Camera::new_with_target(Vector3::new(3.0, 0.7, 3.0), Vector3::zero());
 
     // Render to image data
     RayTracer::render(&scene, &camera, &mut img_data);

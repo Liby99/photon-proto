@@ -15,4 +15,3 @@ neon-build = "0.2.0"
 
 [dependencies]
 neon = "0.2.0"
-anymap = "0.12"

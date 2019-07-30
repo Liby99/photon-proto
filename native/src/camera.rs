@@ -1,4 +1,4 @@
-use ::util::{Vector3, ImageData, Ray};
+use ::util::{Vector3, Ray};
 
 pub struct Camera {
   pub position: Vector3,
@@ -91,8 +91,8 @@ impl<'a> Iterator for CameraRays<'a> {
 
     // Calculate ray
     let origin = self.camera.position;
-    let hor_dir = self.u * self.a * (new_i as f32 - self.hw) / self.hw;
-    let ver_dir = self.v * self.b * (new_j as f32 - self.hh) / self.hh;
+    let hor_dir = self.u * (self.a * (new_i as f32 - self.hw) / self.hw);
+    let ver_dir = self.v * (self.b * (new_j as f32 - self.hh) / self.hh);
     let direction = (self.w + hor_dir + ver_dir).normalize();
     let ray = Ray::new(origin, direction);
 
