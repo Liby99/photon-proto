@@ -160,6 +160,7 @@ impl Div<Vector3> for Vector3 {
   }
 }
 
+#[derive(Clone, Copy)]
 pub struct Vector4 {
   pub x: f32,
   pub y: f32,
@@ -167,8 +168,147 @@ pub struct Vector4 {
   pub w: f32,
 }
 
-pub struct Matrix4 {
+impl Into<Vector3> for Vector4 {
+  fn into(self) -> Vector3 {
+    Vector3 { x: self.x, y: self.y, z: self.z }
+  }
+}
 
+impl Vector4 {
+  pub fn xyzw(x: f32, y: f32, z: f32, w: f32) -> Self {
+    Self { x, y, z, w }
+  }
+
+  pub fn vec3w(v: Vector3, w: f32) -> Self {
+    Self { x: v.x, y: v.y, z: v.z, w }
+  }
+
+  pub fn zero() -> Self {
+    Self { x: 0.0, y: 0.0, z: 0.0, w: 0.0 }
+  }
+
+  pub fn unit_x() -> Self {
+    Self { x: 1.0, y: 0.0, z: 0.0, w: 0.0 }
+  }
+
+  pub fn unit_y() -> Self {
+    Self { x: 0.0, y: 1.0, z: 0.0, w: 0.0 }
+  }
+
+  pub fn unit_z() -> Self {
+    Self { x: 0.0, y: 0.0, z: 1.0, w: 0.0 }
+  }
+
+  pub fn unit_w() -> Self {
+    Self { x: 0.0, y: 0.0, z: 0.0, w: 1.0 }
+  }
+
+  pub fn dot(self, other: Self) -> f32 {
+    self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+  }
+}
+
+pub type Quaternion = Vector4;
+
+impl Into<Matrix4> for Quaternion {
+  fn into(self) -> Matrix4 {
+    Matrix4 {
+      a11: 1.0 - 2.0 * self.y * self.y - 2.0 * self.z * self.z,
+      a12: 2.0 * self.x * self.y - 2.0 * self.z * self.w,
+      a13: 2.0 * self.x * self.z + 2.0 * self.y * self.w,
+      a14: 0.0,
+      a21: 2.0 * self.x * self.y + 2.0 * self.z * self.w,
+      a22: 1.0 - 2.0 * self.x * self.x - 2.0 * self.z * self.z,
+      a23: 2.0 * self.y * self.z - 2.0 * self.x * self.w,
+      a24: 0.0,
+      a31: 2.0 * self.x * self.z - 2.0 * self.y * self.w,
+      a32: 2.0 * self.y * self.z + 2.0 * self.x * self.w,
+      a33: 1.0 - 2.0 * self.x * self.x - 2.0 * self.y * self.y,
+      a34: 0.0,
+      a41: 0.0,
+      a42: 0.0,
+      a43: 0.0,
+      a44: 1.0,
+    }
+  }
+}
+
+#[derive(Clone, Copy)]
+pub struct Matrix4 {
+  pub a11: f32, pub a12: f32, pub a13: f32, pub a14: f32,
+  pub a21: f32, pub a22: f32, pub a23: f32, pub a24: f32,
+  pub a31: f32, pub a32: f32, pub a33: f32, pub a34: f32,
+  pub a41: f32, pub a42: f32, pub a43: f32, pub a44: f32,
+}
+
+impl Add<Matrix4> for Matrix4 {
+  type Output = Self;
+
+  fn add(self, other: Self) -> Self {
+    Self {
+      a11: self.a11 + other.a11, a12: self.a12 + other.a12, a13: self.a13 + other.a13, a14: self.a14 + other.a14,
+      a21: self.a21 + other.a21, a22: self.a22 + other.a22, a23: self.a23 + other.a23, a24: self.a24 + other.a24,
+      a31: self.a31 + other.a31, a32: self.a32 + other.a32, a33: self.a33 + other.a33, a34: self.a34 + other.a34,
+      a41: self.a41 + other.a41, a42: self.a42 + other.a42, a43: self.a43 + other.a43, a44: self.a44 + other.a44,
+    }
+  }
+}
+
+impl Mul<Matrix4> for Matrix4 {
+  type Output = Self;
+
+  fn mul(self, other: Self) -> Self {
+    Self {
+      a11: self.a11 * other.a11 + self.a12 * other.a21 + self.a13 * other.a31 + self.a14 * other.a41,
+      a12: self.a11 * other.a12 + self.a12 * other.a22 + self.a13 * other.a32 + self.a14 * other.a42,
+      a13: self.a11 * other.a13 + self.a12 * other.a23 + self.a13 * other.a33 + self.a14 * other.a43,
+      a14: self.a11 * other.a14 + self.a12 * other.a24 + self.a13 * other.a34 + self.a14 * other.a44,
+
+      a21: self.a21 * other.a11 + self.a22 * other.a21 + self.a23 * other.a31 + self.a24 * other.a41,
+      a22: self.a21 * other.a12 + self.a22 * other.a22 + self.a23 * other.a32 + self.a24 * other.a42,
+      a23: self.a21 * other.a13 + self.a22 * other.a23 + self.a23 * other.a33 + self.a24 * other.a43,
+      a24: self.a21 * other.a14 + self.a22 * other.a24 + self.a23 * other.a34 + self.a24 * other.a44,
+
+      a31: self.a31 * other.a11 + self.a32 * other.a21 + self.a33 * other.a31 + self.a34 * other.a41,
+      a32: self.a31 * other.a12 + self.a32 * other.a22 + self.a33 * other.a32 + self.a34 * other.a42,
+      a33: self.a31 * other.a13 + self.a32 * other.a23 + self.a33 * other.a33 + self.a34 * other.a43,
+      a34: self.a31 * other.a14 + self.a32 * other.a24 + self.a33 * other.a34 + self.a34 * other.a44,
+
+      a41: self.a41 * other.a11 + self.a42 * other.a21 + self.a43 * other.a31 + self.a44 * other.a41,
+      a42: self.a41 * other.a12 + self.a42 * other.a22 + self.a43 * other.a32 + self.a44 * other.a42,
+      a43: self.a41 * other.a13 + self.a42 * other.a23 + self.a43 * other.a33 + self.a44 * other.a43,
+      a44: self.a41 * other.a14 + self.a42 * other.a24 + self.a43 * other.a34 + self.a44 * other.a44,
+    }
+  }
+}
+
+impl Matrix4 {
+  pub fn identity() -> Self {
+    Self {
+      a11: 1.0, a12: 0.0, a13: 0.0, a14: 0.0,
+      a21: 0.0, a22: 1.0, a23: 0.0, a24: 0.0,
+      a31: 0.0, a32: 0.0, a33: 1.0, a34: 0.0,
+      a41: 0.0, a42: 0.0, a43: 0.0, a44: 1.0,
+    }
+  }
+
+  pub fn scale_matrix(scale: Vector3) -> Self {
+    Self {
+      a11: scale.x, a12: 0.0, a13: 0.0, a14: 0.0,
+      a21: 0.0, a22: scale.y, a23: 0.0, a24: 0.0,
+      a31: 0.0, a32: 0.0, a33: scale.z, a34: 0.0,
+      a41: 0.0, a42: 0.0, a43: 0.0, a44: 1.0,
+    }
+  }
+
+  pub fn translate_matrix(position: Vector3) -> Self {
+    Self {
+      a11: 1.0, a12: 0.0, a13: 0.0, a14: position.x,
+      a21: 0.0, a22: 1.0, a23: 0.0, a24: position.y,
+      a31: 0.0, a32: 0.0, a33: 1.0, a34: position.z,
+      a41: 0.0, a42: 0.0, a43: 0.0, a44: 1.0,
+    }
+  }
 }
 
 pub struct Ray {
@@ -221,5 +361,20 @@ impl<'a> ImageData<'a> {
     self.buffer[index + 1] = c.g;
     self.buffer[index + 2] = c.b;
     self.buffer[index + 3] = c.a;
+  }
+}
+
+pub struct Transform {
+  position: Vector3,
+  scale: Vector3,
+  rotation: Quaternion,
+}
+
+impl Into<Matrix4> for Transform {
+  fn into(self) -> Matrix4 {
+    let pos_mat = Matrix4::translate_matrix(self.position);
+    let scale_mat = Matrix4::scale_matrix(self.scale);
+    let rot_mat = self.rotation.into();
+    pos_mat * scale_mat * rot_mat
   }
 }
