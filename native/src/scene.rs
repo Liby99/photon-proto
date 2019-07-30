@@ -1,7 +1,8 @@
-use ::intersectable::Intersectable;
+use ::object::Object;
+use ::util::{Ray, IntersectionInfo};
 
 pub struct Scene {
-  pub objects: Vec<Box<dyn Intersectable>>,
+  pub objects: Vec<Object>,
 }
 
 impl Scene {
@@ -9,7 +10,9 @@ impl Scene {
     Scene { objects: vec![] }
   }
 
-  // pub fn add_object<T: Intersectable>(&mut self, obj: T) {
-  //   self.objects.push(Box::new(obj));
-  // }
+  pub fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
+    self.objects.iter().fold(None, |acc, obj| {
+      IntersectionInfo::min(acc, obj.intersect(&ray))
+    })
+  }
 }

@@ -92,6 +92,12 @@ impl Vector3 {
   }
 }
 
+impl From<Vector4> for Vector3 {
+  fn from(vec: Vector4) -> Self {
+    Self { x: vec.x, y: vec.y, z: vec.z }
+  }
+}
+
 impl Neg for Vector3 {
   type Output = Self;
 
@@ -168,11 +174,11 @@ pub struct Vector4 {
   pub w: f32,
 }
 
-impl Into<Vector3> for Vector4 {
-  fn into(self) -> Vector3 {
-    Vector3 { x: self.x, y: self.y, z: self.z }
-  }
-}
+// impl Into<Vector3> for Vector4 {
+//   fn into(self) -> Vector3 {
+//     Vector3 { x: self.x, y: self.y, z: self.z }
+//   }
+// }
 
 impl Vector4 {
   pub fn xyzw(x: f32, y: f32, z: f32, w: f32) -> Self {
@@ -233,6 +239,12 @@ impl Into<Matrix4> for Quaternion {
   }
 }
 
+impl Quaternion {
+  pub fn identity() -> Quaternion {
+    Self { x: 0.0, y: 0.0, z: 0.0, w: 1.0 }
+  }
+}
+
 #[derive(Clone, Copy)]
 pub struct Matrix4 {
   pub a11: f32, pub a12: f32, pub a13: f32, pub a14: f32,
@@ -282,6 +294,19 @@ impl Mul<Matrix4> for Matrix4 {
   }
 }
 
+impl Mul<Vector4> for Matrix4 {
+  type Output = Vector4;
+
+  fn mul(self, other: Vector4) -> Vector4 {
+    Vector4 {
+      x: self.a11 * other.x + self.a12 * other.y + self.a13 * other.z + self.a14 * other.w,
+      y: self.a21 * other.x + self.a22 * other.y + self.a23 * other.z + self.a24 * other.w,
+      z: self.a31 * other.x + self.a32 * other.y + self.a33 * other.z + self.a34 * other.w,
+      w: self.a41 * other.x + self.a42 * other.y + self.a43 * other.z + self.a44 * other.w,
+    }
+  }
+}
+
 impl Matrix4 {
   pub fn identity() -> Self {
     Self {
@@ -289,6 +314,82 @@ impl Matrix4 {
       a21: 0.0, a22: 1.0, a23: 0.0, a24: 0.0,
       a31: 0.0, a32: 0.0, a33: 1.0, a34: 0.0,
       a41: 0.0, a42: 0.0, a43: 0.0, a44: 1.0,
+    }
+  }
+
+  pub fn transpose(self) -> Self {
+    Self {
+      a11: self.a11, a12: self.a21, a13: self.a31, a14: self.a41,
+      a21: self.a12, a22: self.a22, a23: self.a32, a24: self.a42,
+      a31: self.a13, a32: self.a23, a33: self.a33, a34: self.a43,
+      a41: self.a14, a42: self.a24, a43: self.a34, a44: self.a44,
+    }
+  }
+
+  pub fn inverse(self) -> Self {
+
+    // Cache the value
+    let a00 = self.a11;
+    let a01 = self.a12;
+    let a02 = self.a13;
+    let a03 = self.a14;
+    let a10 = self.a21;
+    let a11 = self.a22;
+    let a12 = self.a23;
+    let a13 = self.a24;
+    let a20 = self.a31;
+    let a21 = self.a32;
+    let a22 = self.a33;
+    let a23 = self.a34;
+    let a30 = self.a41;
+    let a31 = self.a42;
+    let a32 = self.a43;
+    let a33 = self.a44;
+
+    // Calculate...
+    let b00 = a00 * a11 - a01 * a10;
+    let b01 = a00 * a12 - a02 * a10;
+    let b02 = a00 * a13 - a03 * a10;
+    let b03 = a01 * a12 - a02 * a11;
+    let b04 = a01 * a13 - a03 * a11;
+    let b05 = a02 * a13 - a03 * a12;
+    let b06 = a20 * a31 - a21 * a30;
+    let b07 = a20 * a32 - a22 * a30;
+    let b08 = a20 * a33 - a23 * a30;
+    let b09 = a21 * a32 - a22 * a31;
+    let b10 = a21 * a33 - a23 * a31;
+    let b11 = a22 * a33 - a23 * a32;
+
+    // Calculate the determinant
+    let det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+    if det == 0.0 {
+      panic!("Matrix not invertible");
+    }
+    let det = 1.0 / det;
+
+    // Final
+    let o11 = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+    let o12 = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+    let o13 = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+    let o14 = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+    let o21 = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+    let o22 = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+    let o23 = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+    let o24 = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+    let o31 = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+    let o32 = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+    let o33 = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+    let o34 = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+    let o41 = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+    let o42 = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+    let o43 = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+    let o44 = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+
+    Self {
+      a11: o11, a12: o12, a13: o13, a14: o14,
+      a21: o21, a22: o22, a23: o23, a24: o24,
+      a31: o31, a32: o32, a33: o33, a34: o34,
+      a41: o41, a42: o42, a43: o43, a44: o44,
     }
   }
 
@@ -323,6 +424,20 @@ impl Ray {
 
   pub fn point_at(&self, t: f32) -> Vector3 {
     self.origin.clone() + self.direction.clone() * t
+  }
+
+  pub fn transform(&self, mat: Matrix4) -> Ray {
+    let transformed_origin = mat * Vector4::vec3w(self.origin, 1.0);
+    let normalized_origin = Vector3::from(transformed_origin) / transformed_origin.w;
+    let normalized_direction = Vector3::from(mat * Vector4::vec3w(self.direction, 0.0));
+    Self {
+      origin: normalized_origin,
+      direction: normalized_direction,
+    }
+  }
+
+  pub fn inverse_transform(&self, mat: Matrix4) -> Ray {
+    self.transform(mat.inverse())
   }
 }
 
@@ -364,17 +479,18 @@ impl<'a> ImageData<'a> {
   }
 }
 
+#[derive(Copy, Clone)]
 pub struct Transform {
-  position: Vector3,
-  scale: Vector3,
-  rotation: Quaternion,
+  pub position: Vector3,
+  pub scale: Vector3,
+  pub rotation: Quaternion,
 }
 
 impl Into<Matrix4> for Transform {
   fn into(self) -> Matrix4 {
     let pos_mat = Matrix4::translate_matrix(self.position);
     let scale_mat = Matrix4::scale_matrix(self.scale);
-    let rot_mat = self.rotation.into();
+    let rot_mat: Matrix4 = self.rotation.into();
     pos_mat * scale_mat * rot_mat
   }
 }

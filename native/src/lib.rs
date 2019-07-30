@@ -6,14 +6,16 @@ pub mod util;
 pub mod intersectable;
 pub mod renderer;
 pub mod camera;
+pub mod object;
 
 use neon::prelude::*;
 
-use util::{Vector3, ImageData};
+use util::{Vector3, Quaternion, ImageData, Transform};
 use scene::Scene;
 use intersectable::{Sphere, Cube, Plane};
 use renderer::RayTracer;
 use camera::Camera;
+use object::Object as RenderObject;
 
 fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
@@ -33,9 +35,17 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     // Create the scene
     let scene = Scene {
       objects: vec![
-        Box::new(Plane::new()),
-        Box::new(Sphere::new(1.0)),
-        Box::new(Cube::new(1.0, 1.0, 1.0)),
+        // Box::new(Plane::new()),
+        // Box::new(Sphere::new(1.0)),
+        // Box::new(Cube::new(1.0, 1.0, 1.0)),
+        RenderObject {
+          transform: Transform {
+            position: Vector3::zero(),
+            scale: Vector3::new(1.0, 0.3, 1.0),
+            rotation: Quaternion::identity(),
+          },
+          intersectable: Box::new(Sphere::new(1.0))
+        }
       ]
     };
 
