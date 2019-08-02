@@ -1,7 +1,7 @@
-use ::util::{Color, ImageData, IntersectionInfo};
+use ::math::{Color};
+use ::util::{ImageData, IntersectionInfo, Transform};
 use ::scene::Scene;
 use ::camera::Camera;
-// use ::intersectable::Intersectable;
 
 pub struct RayTracer;
 

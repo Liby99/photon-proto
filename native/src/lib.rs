@@ -1,8 +1,9 @@
 #[macro_use]
 extern crate neon;
 
-pub mod scene;
+pub mod math;
 pub mod util;
+pub mod scene;
 pub mod intersectable;
 pub mod renderer;
 pub mod camera;
@@ -10,7 +11,8 @@ pub mod object;
 
 use neon::prelude::*;
 
-use util::{Vector3, Quaternion, ImageData, Transform};
+use math::{Vector3, Quaternion};
+use util::{ImageData, Transform};
 use scene::Scene;
 use intersectable::{Sphere, Cube, Plane};
 use renderer::RayTracer;
@@ -39,7 +41,7 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
           transform: Transform {
             position: Vector3::new(0.0, 0.15, 0.0),
             scale: Vector3::new(1.0, 1.0, 1.0),
-            rotation: Quaternion::identity(),
+            rotation: Quaternion::axis_angle(Vector3::new(0.0, 1.0, 0.0), 3.14),
           },
           intersectable: Box::new(Sphere::new(0.3))
         },

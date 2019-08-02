@@ -1,4 +1,5 @@
-use ::util::{Vector3, Ray};
+use ::math::{Vector3};
+use ::util::{Ray};
 
 pub struct Camera {
   pub position: Vector3,

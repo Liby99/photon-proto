@@ -1,4 +1,5 @@
-use ::util::{Vector3, Ray, IntersectionInfo};
+use ::math::{Vector3};
+use ::util::{Ray, IntersectionInfo};
 
 pub trait Intersectable {
   fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo>;
