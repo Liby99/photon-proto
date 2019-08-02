@@ -27,13 +27,13 @@ impl Ray {
 }
 
 #[derive(Clone, Copy)]
-pub struct IntersectionInfo {
+pub struct Intersection {
   pub position: Vector3,
   pub normal: Vector3,
   pub t: f32,
 }
 
-impl IntersectionInfo {
+impl Intersection {
   pub fn min(lhs: Option<Self>, rhs: Option<Self>) -> Option<Self> {
     match (lhs, rhs) {
       (Some(i1), Some(i2)) => {

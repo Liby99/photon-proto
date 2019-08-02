@@ -1,8 +1,8 @@
 use ::math::{Vector3};
-use ::util::{Ray, IntersectionInfo};
+use ::util::{Ray, Intersection};
 
 pub trait Intersectable {
-  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo>;
+  fn intersect(&self, ray: &Ray) -> Option<Intersection>;
 }
 
 pub struct Cube {
@@ -18,7 +18,7 @@ impl Cube {
 }
 
 impl Intersectable for Cube {
-  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
+  fn intersect(&self, ray: &Ray) -> Option<Intersection> {
     let hx = self.size_x / 2.0;
     let hy = self.size_y / 2.0;
     let hz = self.size_z / 2.0;
@@ -48,7 +48,7 @@ impl Intersectable for Cube {
       } else {
         if position.z > 0.0 { Vector3::k() } else { -Vector3::k() }
       } * sign;
-      Some(IntersectionInfo { position, normal, t })
+      Some(Intersection { position, normal, t })
     }
   }
 }
@@ -62,13 +62,13 @@ impl Plane {
 }
 
 impl Intersectable for Plane {
-  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
+  fn intersect(&self, ray: &Ray) -> Option<Intersection> {
     if ray.direction.y == 0.0 {
       return None;
     }
     let t = ray.origin.y / -ray.direction.y;
     if t > 0.0 {
-      Some(IntersectionInfo {
+      Some(Intersection {
         position: ray.point_at(t),
         normal: if ray.origin.y > 0.0 { Vector3::j() } else { -Vector3::j() },
         t
@@ -90,7 +90,7 @@ impl Sphere {
 }
 
 impl Intersectable for Sphere {
-  fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
+  fn intersect(&self, ray: &Ray) -> Option<Intersection> {
     let a = ray.direction.dot(&ray.direction);
     let b = 2.0 * ray.direction.dot(&ray.origin);
     let c = ray.origin.dot(&ray.origin) - self.radius * self.radius;
@@ -105,7 +105,7 @@ impl Intersectable for Sphere {
       return None
     };
     let position = ray.point_at(t);
-    Some(IntersectionInfo {
+    Some(Intersection {
       position: position,
       normal: (position * sign).normalize(),
       t: t,

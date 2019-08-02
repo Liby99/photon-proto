@@ -1,5 +1,5 @@
 use ::object::Object;
-use ::util::{Ray, IntersectionInfo};
+use ::util::{Ray, Intersection};
 
 pub struct Scene {
   pub objects: Vec<Object>,
@@ -10,9 +10,9 @@ impl Scene {
     Scene { objects: vec![] }
   }
 
-  pub fn intersect(&self, ray: &Ray) -> Option<IntersectionInfo> {
+  pub fn intersect(&self, ray: &Ray) -> Option<Intersection> {
     self.objects.iter().fold(None, |acc, obj| {
-      IntersectionInfo::min(acc, obj.intersect(&ray))
+      Intersection::min(acc, obj.intersect(&ray))
     })
   }
 }

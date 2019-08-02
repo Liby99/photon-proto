@@ -1,5 +1,5 @@
 use ::math::{Color};
-use ::util::{ImageData, IntersectionInfo, Transform};
+use ::util::{ImageData, Intersection};
 use ::scene::Scene;
 use ::camera::Camera;
 
