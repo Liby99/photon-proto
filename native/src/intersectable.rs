@@ -31,7 +31,7 @@ impl Intersectable for Cube {
     let t_min = t_min_vec.x.max(t_min_vec.y).max(t_min_vec.z);
     let t_max = t_max_vec.x.min(t_max_vec.y).min(t_max_vec.z);
     if t_max - t_min < 0.0 {
-      return None;
+      None
     } else {
       let (t, sign) = if t_min > 0.0 && t_max > 0.0 {
         (t_min, 1.0)
@@ -64,17 +64,18 @@ impl Plane {
 impl Intersectable for Plane {
   fn intersect(&self, ray: &Ray) -> Option<Intersection> {
     if ray.direction.y == 0.0 {
-      return None;
-    }
-    let t = ray.origin.y / -ray.direction.y;
-    if t > 0.0 {
-      Some(Intersection {
-        position: ray.point_at(t),
-        normal: if ray.origin.y > 0.0 { Vector3::j() } else { -Vector3::j() },
-        t
-      })
-    } else {
       None
+    } else {
+      let t = ray.origin.y / -ray.direction.y;
+      if t > 0.0 {
+        Some(Intersection {
+          position: ray.point_at(t),
+          normal: if ray.origin.y > 0.0 { Vector3::j() } else { -Vector3::j() },
+          t
+        })
+      } else {
+        None
+      }
     }
   }
 }
