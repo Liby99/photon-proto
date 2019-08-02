@@ -47,8 +47,8 @@ impl Camera {
 
   pub fn rays<'a>(&'a self, width: usize, height: usize) -> CameraRays<'a> {
     let w = self.forward; // front
-    let u = w.cross(self.up); // right
-    let v = u.cross(w); // up
+    let u = w.cross(self.up).normalize(); // right
+    let v = u.cross(w).normalize(); // up
     let b = -(self.fovy / 2.0).tan();
     let a = b * width as f32 / height as f32;
     let hw = width as f32 / 2.0;
