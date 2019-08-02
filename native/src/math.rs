@@ -1,6 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div, Neg};
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Color {
   pub r: u8,
   pub g: u8,
@@ -49,7 +49,7 @@ impl Color {
   }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vector3 {
   pub x: f32,
   pub y: f32,
@@ -205,7 +205,7 @@ impl Div<Vector3> for Vector3 {
   }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vector4 {
   pub x: f32,
   pub y: f32,
@@ -288,7 +288,7 @@ impl Quaternion {
   }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Matrix4 {
   pub a11: f32, pub a12: f32, pub a13: f32, pub a14: f32,
   pub a21: f32, pub a22: f32, pub a23: f32, pub a24: f32,

@@ -1,6 +1,7 @@
 use ::math::{Vector3};
 use ::util::{Ray};
 
+#[derive(Debug)]
 pub struct ThirdPersonCamera {
   pub target: Vector3,
   pub azimuth: f32,
@@ -8,6 +9,7 @@ pub struct ThirdPersonCamera {
   pub distance: f32,
 }
 
+#[derive(Debug)]
 pub struct Camera {
   pub position: Vector3,
   pub forward: Vector3,
@@ -34,13 +36,13 @@ impl Camera {
   }
 
   pub fn third_person(tpc: &ThirdPersonCamera) -> Self {
-    let offset = Vector3::new(
+    let direction = Vector3::new(
       tpc.azimuth.sin() * tpc.incline.cos(),
       tpc.incline.sin(),
       tpc.azimuth.cos() * tpc.incline.cos(),
-    ) * tpc.distance;
-    let position = tpc.target + offset;
-    Self::new(position, -offset)
+    );
+    let position = tpc.target + direction * tpc.distance;
+    Self::new(position, -direction)
   }
 
   pub fn rays<'a>(&'a self, width: usize, height: usize) -> CameraRays<'a> {
