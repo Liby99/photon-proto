@@ -36,10 +36,10 @@ impl Camera {
   }
 
   pub fn third_person(tpc: &ThirdPersonCamera) -> Self {
-    let direction = Vector3::new(
+    let direction = vec3!(
       tpc.azimuth.sin() * tpc.incline.cos(),
       tpc.incline.sin(),
-      tpc.azimuth.cos() * tpc.incline.cos(),
+      tpc.azimuth.cos() * tpc.incline.cos()
     );
     let position = tpc.target + direction * tpc.distance;
     Self::new(position, -direction)

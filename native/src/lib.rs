@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate neon;
 
+#[macro_use]
 pub mod math;
 pub mod util;
 pub mod scene;
@@ -36,7 +37,7 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
   let incline = camera.get(&mut cx, "incline")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as f32;
   let distance = camera.get(&mut cx, "distance")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as f32;
   let tpc = ThirdPersonCamera {
-    target: Vector3::new(target_x, target_y, target_z),
+    target: vec3!(target_x, target_y, target_z),
     azimuth,
     incline,
     distance,
@@ -55,16 +56,16 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
       objects: vec![
         RenderObject {
           transform: Transform {
-            position: Vector3::new(0.0, 0.15, 0.0),
-            scale: Vector3::new(1.0, 1.0, 1.0),
-            rotation: Quaternion::axis_angle(Vector3::new(0.0, 1.0, 0.0), 3.14),
+            position: vec3!(0.0, 0.15, 0.0),
+            scale: vec3!(1.0, 1.0, 1.0),
+            rotation: Quaternion::axis_angle(vec3!(0.0, 1.0, 0.0), 3.14),
           },
           intersectable: Box::new(Sphere::new(0.3))
         },
         RenderObject {
           transform: Transform {
-            position: Vector3::zero(),
-            scale: Vector3::new(1.0, 1.0, 1.0),
+            position: vec3!(0.0),
+            scale: vec3!(1.0, 1.0, 1.0),
             rotation: Quaternion::identity(),
           },
           intersectable: Box::new(Plane::new())

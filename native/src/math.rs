@@ -56,6 +56,11 @@ pub struct Vector3 {
   pub z: f32,
 }
 
+macro_rules! vec3 {
+  ($c:expr) => (Vector3::new($c, $c, $c));
+  ($x:expr, $y:expr, $z:expr) => (Vector3::new($x, $y, $z));
+}
+
 impl Vector3 {
   pub fn zero() -> Vector3 {
     Vector3 { x: 0.0, y: 0.0, z: 0.0 }
@@ -237,6 +242,15 @@ pub struct Vector4 {
   pub w: f32,
 }
 
+macro_rules! vec4 {
+  ( $x:expr ) => {
+    Vector4::new($x, $x, $x, $x)
+  };
+  ( $x: expr, $y: expr, $z: expr, $w: expr ) => {
+    Vector4::new($x, $y, $z, $w)
+  };
+}
+
 impl Vector4 {
   pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
     Self { x, y, z, w }
@@ -412,20 +426,20 @@ impl Matrix4 {
 
   pub fn row(&self, id: u8) -> Vector4 {
     match id {
-      0 => Vector4::new(self.a11, self.a12, self.a13, self.a14),
-      1 => Vector4::new(self.a21, self.a22, self.a23, self.a24),
-      2 => Vector4::new(self.a31, self.a32, self.a33, self.a34),
-      3 => Vector4::new(self.a41, self.a42, self.a43, self.a44),
+      0 => vec4!(self.a11, self.a12, self.a13, self.a14),
+      1 => vec4!(self.a21, self.a22, self.a23, self.a24),
+      2 => vec4!(self.a31, self.a32, self.a33, self.a34),
+      3 => vec4!(self.a41, self.a42, self.a43, self.a44),
       _ => panic!("Non-existing row for Matrix4")
     }
   }
 
   pub fn col(&self, id: u8) -> Vector4 {
     match id {
-      0 => Vector4::new(self.a11, self.a21, self.a31, self.a41),
-      1 => Vector4::new(self.a12, self.a22, self.a32, self.a42),
-      2 => Vector4::new(self.a13, self.a23, self.a33, self.a43),
-      3 => Vector4::new(self.a14, self.a24, self.a34, self.a44),
+      0 => vec4!(self.a11, self.a21, self.a31, self.a41),
+      1 => vec4!(self.a12, self.a22, self.a32, self.a42),
+      2 => vec4!(self.a13, self.a23, self.a33, self.a43),
+      3 => vec4!(self.a14, self.a24, self.a34, self.a44),
       _ => panic!("Non-existing column for Matrix4")
     }
   }

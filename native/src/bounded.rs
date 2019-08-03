@@ -40,13 +40,13 @@ impl Bounded for Cube {
     let hx = self.size_x / 2.0;
     let hy = self.size_y / 2.0;
     let hz = self.size_z / 2.0;
-    BoundingBox::new(Vector3::new(-hx, -hy, -hz), Vector3::new(hx, hy, hz))
+    BoundingBox::new(vec3!(-hx, -hy, -hz), vec3!(hx, hy, hz))
   }
 }
 
 impl Bounded for Sphere {
   fn bounding_box(&self) -> BoundingBox {
-    let v = Vector3::new(self.radius, self.radius, self.radius);
+    let v = vec3!(self.radius, self.radius, self.radius);
     BoundingBox::new(-v, v)
   }
 }
