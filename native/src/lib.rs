@@ -8,6 +8,7 @@ pub mod intersectable;
 pub mod renderer;
 pub mod camera;
 pub mod object;
+pub mod bounded;
 
 use neon::prelude::*;
 

@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div, Neg};
+use std::ops::{Add, Sub, Mul, Div, Neg, Index, IndexMut};
 
 #[derive(Debug, Clone)]
 pub struct Color {
@@ -137,6 +137,30 @@ impl From<Vector4> for Vector3 {
   }
 }
 
+impl Index<u8> for Vector3 {
+  type Output = f32;
+
+  fn index(&self, id: u8) -> &f32 {
+    match id {
+      0 => &self.x,
+      1 => &self.y,
+      2 => &self.z,
+      _ => panic!("Non-existing index for Vector3")
+    }
+  }
+}
+
+impl IndexMut<u8> for Vector3 {
+  fn index_mut(&mut self, id: u8) -> &mut f32 {
+    match id {
+      0 => &mut self.x,
+      1 => &mut self.y,
+      2 => &mut self.z,
+      _ => panic!("Non-existing index for Vector3")
+    }
+  }
+}
+
 impl Neg for Vector3 {
   type Output = Self;
 
@@ -214,7 +238,7 @@ pub struct Vector4 {
 }
 
 impl Vector4 {
-  pub fn xyzw(x: f32, y: f32, z: f32, w: f32) -> Self {
+  pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
     Self { x, y, z, w }
   }
 
@@ -244,6 +268,32 @@ impl Vector4 {
 
   pub fn dot(self, other: Self) -> f32 {
     self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
+  }
+}
+
+impl Index<u8> for Vector4 {
+  type Output = f32;
+
+  fn index(&self, id: u8) -> &f32 {
+    match id {
+      0 => &self.x,
+      1 => &self.y,
+      2 => &self.z,
+      3 => &self.w,
+      _ => panic!("Non-existing index for Vector4")
+    }
+  }
+}
+
+impl IndexMut<u8> for Vector4 {
+  fn index_mut(&mut self, id: u8) -> &mut f32 {
+    match id {
+      0 => &mut self.x,
+      1 => &mut self.y,
+      2 => &mut self.z,
+      3 => &mut self.w,
+      _ => panic!("Non-existing index for Vector4")
+    }
   }
 }
 
@@ -360,6 +410,36 @@ impl Matrix4 {
     }
   }
 
+  pub fn row(&self, id: u8) -> Vector4 {
+    match id {
+      0 => Vector4::new(self.a11, self.a12, self.a13, self.a14),
+      1 => Vector4::new(self.a21, self.a22, self.a23, self.a24),
+      2 => Vector4::new(self.a31, self.a32, self.a33, self.a34),
+      3 => Vector4::new(self.a41, self.a42, self.a43, self.a44),
+      _ => panic!("Non-existing row for Matrix4")
+    }
+  }
+
+  pub fn col(&self, id: u8) -> Vector4 {
+    match id {
+      0 => Vector4::new(self.a11, self.a21, self.a31, self.a41),
+      1 => Vector4::new(self.a12, self.a22, self.a32, self.a42),
+      2 => Vector4::new(self.a13, self.a23, self.a33, self.a43),
+      3 => Vector4::new(self.a14, self.a24, self.a34, self.a44),
+      _ => panic!("Non-existing column for Matrix4")
+    }
+  }
+
+  pub fn at(&self, row: u8, col: u8) -> f32 {
+    match (row, col) {
+      (0, 0) => self.a11, (0, 1) => self.a12, (0, 2) => self.a13, (0, 3) => self.a14,
+      (1, 0) => self.a21, (1, 1) => self.a22, (1, 2) => self.a23, (1, 3) => self.a24,
+      (2, 0) => self.a31, (2, 1) => self.a32, (2, 2) => self.a33, (2, 3) => self.a34,
+      (3, 0) => self.a41, (3, 1) => self.a42, (3, 2) => self.a43, (3, 3) => self.a44,
+      _ => panic!("Non-existing entry of Matrix4")
+    }
+  }
+
   pub fn transpose(self) -> Self {
     Self {
       a11: self.a11, a12: self.a21, a13: self.a31, a14: self.a41,
@@ -451,6 +531,32 @@ impl Matrix4 {
       a21: 0.0, a22: 1.0, a23: 0.0, a24: position.y,
       a31: 0.0, a32: 0.0, a33: 1.0, a34: position.z,
       a41: 0.0, a42: 0.0, a43: 0.0, a44: 1.0,
+    }
+  }
+}
+
+impl Index<(u8, u8)> for Matrix4 {
+  type Output = f32;
+
+  fn index(&self, id: (u8, u8)) -> &f32 {
+    match id {
+      (0, 0) => &self.a11, (0, 1) => &self.a12, (0, 2) => &self.a13, (0, 3) => &self.a14,
+      (1, 0) => &self.a21, (1, 1) => &self.a22, (1, 2) => &self.a23, (1, 3) => &self.a24,
+      (2, 0) => &self.a31, (2, 1) => &self.a32, (2, 2) => &self.a33, (2, 3) => &self.a34,
+      (3, 0) => &self.a41, (3, 1) => &self.a42, (3, 2) => &self.a43, (3, 3) => &self.a44,
+      _ => panic!("Non-existing entry of Matrix4")
+    }
+  }
+}
+
+impl IndexMut<(u8, u8)> for Matrix4 {
+  fn index_mut(&mut self, id: (u8, u8)) -> &mut f32 {
+    match id {
+      (0, 0) => &mut self.a11, (0, 1) => &mut self.a12, (0, 2) => &mut self.a13, (0, 3) => &mut self.a14,
+      (1, 0) => &mut self.a21, (1, 1) => &mut self.a22, (1, 2) => &mut self.a23, (1, 3) => &mut self.a24,
+      (2, 0) => &mut self.a31, (2, 1) => &mut self.a32, (2, 2) => &mut self.a33, (2, 3) => &mut self.a34,
+      (3, 0) => &mut self.a41, (3, 1) => &mut self.a42, (3, 2) => &mut self.a43, (3, 3) => &mut self.a44,
+      _ => panic!("Non-existing entry of Matrix4")
     }
   }
 }
