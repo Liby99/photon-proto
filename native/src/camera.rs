@@ -57,7 +57,7 @@ impl Camera {
       camera: self,
       i: 0,
       j: 0,
-      w: self.forward,
+      w,
       u,
       v,
       b,
@@ -67,6 +67,21 @@ impl Camera {
       width,
       height,
     }
+  }
+
+  pub fn ray(&self, i: usize, j: usize, width: usize, height: usize) -> Ray {
+    let w = self.forward; // front
+    let u = w.cross(self.up).normalize(); // right
+    let v = u.cross(w).normalize(); // up
+    let b = -(self.fovy / 2.0).tan();
+    let a = b * width as f32 / height as f32;
+    let hw = width as f32 / 2.0;
+    let hh = height as f32 / 2.0;
+    let origin = self.position;
+    let hor_dir = u * (a * (i as f32 - hw) / hw);
+    let ver_dir = v * (b * (j as f32 - hh) / hh);
+    let direction = (w + hor_dir + ver_dir).normalize();
+    Ray::new(origin, direction)
   }
 }
 
@@ -96,13 +111,20 @@ impl<'a> Iterator for CameraRays<'a> {
 
   fn next(&mut self) -> Option<(usize, usize, Ray)> {
 
+    // Store the value
+    let old_i = self.i;
+    let old_j = self.j;
+
+    // Check column
+    if old_j >= self.height {
+      return None;
+    }
+
     // Get the next ray i and j
     let (new_i, new_j) = if self.i < self.width - 1 {
       (self.i + 1, self.j)
-    } else if self.j < self.height - 1 {
-      (0, self.j + 1)
     } else {
-      return None;
+      (0, self.j + 1)
     };
 
     // Mutate the state
@@ -111,12 +133,12 @@ impl<'a> Iterator for CameraRays<'a> {
 
     // Calculate ray
     let origin = self.camera.position;
-    let hor_dir = self.u * (self.a * (new_i as f32 - self.hw) / self.hw);
-    let ver_dir = self.v * (self.b * (new_j as f32 - self.hh) / self.hh);
+    let hor_dir = self.u * (self.a * (old_i as f32 - self.hw) / self.hw);
+    let ver_dir = self.v * (self.b * (old_j as f32 - self.hh) / self.hh);
     let direction = (self.w + hor_dir + ver_dir).normalize();
     let ray = Ray::new(origin, direction);
 
     // Has the next ray
-    return Some((new_i, new_j, ray));
+    return Some((old_i, old_j, ray));
   }
 }

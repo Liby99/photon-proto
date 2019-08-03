@@ -70,6 +70,136 @@ impl<'a> ImageData<'a> {
     self.buffer[index + 2] = c.b;
     self.buffer[index + 3] = c.a;
   }
+
+  pub fn levels(&self) -> ImageLevelIter {
+    ImageLevelIter {
+      tile_size: 64,
+      is_init: true,
+      width: self.width,
+      height: self.height,
+    }
+  }
+}
+
+pub struct ImageLevel {
+  pub tile_size: usize,
+  pub is_init: bool,
+  pub width: usize,
+  pub height: usize,
+}
+
+impl ImageLevel {
+  pub fn tiles(&self) -> TileIter {
+    TileIter {
+      tile_size: self.tile_size,
+      width: self.width,
+      height: self.height,
+      is_init: self.is_init,
+      x: 0,
+      y: 0,
+      in_even_row: true
+    }
+  }
+}
+
+pub struct ImageLevelIter {
+  pub tile_size: usize,
+  pub is_init: bool,
+  pub width: usize,
+  pub height: usize,
+}
+
+impl Iterator for ImageLevelIter {
+  type Item = ImageLevel;
+
+  fn next(&mut self) -> Option<ImageLevel> {
+    if self.tile_size > 0 {
+      let curr_tile_size = self.tile_size;
+      let curr_is_init = self.is_init;
+
+      // Mutate
+      self.tile_size /= 2;
+      self.is_init = false;
+
+      // Generate
+      Some(ImageLevel {
+        tile_size: curr_tile_size,
+        is_init: curr_is_init,
+        width: self.width,
+        height: self.height
+      })
+    } else {
+      None
+    }
+  }
+}
+
+pub struct Tile {
+  pub x: usize,
+  pub y: usize,
+  pub w: usize,
+  pub h: usize,
+}
+
+pub struct TileIter {
+  pub tile_size: usize,
+  pub x: usize,
+  pub y: usize,
+  pub width: usize,
+  pub height: usize,
+  pub is_init: bool,
+  pub in_even_row: bool,
+}
+
+impl Iterator for TileIter {
+  type Item = Tile;
+
+  fn next(&mut self) -> Option<Tile> {
+    if self.y >= self.height {
+      None
+    } else {
+
+      let curr_x = self.x;
+      let curr_y = self.y;
+
+      // Get the states
+      let (
+        next_x,
+        next_y,
+        curr_tile_width,
+        curr_tile_height
+      ) = if curr_x + self.tile_size >= self.width {
+        let next_x = 0;
+        let curr_tile_width = self.width - curr_x;
+        if curr_y + self.tile_size >= self.height {
+          let next_y = self.height;
+          let curr_tile_height = self.height - curr_y;
+          (next_x, next_y, curr_tile_width, curr_tile_height)
+        } else {
+          let next_y = curr_y + self.tile_size;
+          let curr_tile_height = self.tile_size;
+          (next_x, next_y, curr_tile_width, curr_tile_height)
+        }
+      } else {
+        let next_x = curr_x + self.tile_size;
+        let curr_tile_width = self.tile_size;
+        let next_y = curr_y;
+        let curr_tile_height = self.tile_size.min(self.height - curr_y);
+        (next_x, next_y, curr_tile_width, curr_tile_height)
+      };
+
+      // Do the mutation
+      self.x = next_x;
+      self.y = next_y;
+
+      Some(Tile {
+        x: curr_x,
+        y: curr_y,
+        w: curr_tile_width,
+        h: curr_tile_height,
+      })
+    }
+  }
 }
 
 #[derive(Copy, Clone)]

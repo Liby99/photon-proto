@@ -11,6 +11,7 @@ pub mod camera;
 pub mod object;
 pub mod bounded;
 
+use std::sync::mpsc::{self, RecvTimeoutError, TryRecvError};
 use neon::prelude::*;
 
 use math::{Vector3, Quaternion};
@@ -82,6 +83,210 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
   Ok(cx.undefined())
 }
+
+// pub enum Event {
+//   Update,
+//   Finish
+// }
+
+// fn event_thread(
+//   scene: &Scene,
+//   camera: &Camera,
+//   img_data: &mut ImageData,
+//   shutdown_rx: mpsc::Receiver<()>
+// ) -> mpsc::Receiver<Event> {
+//   let (tx, events_rx) = mpsc::channel();
+//   thread::spawn(move || {
+//     for level in img_data.levels() {
+
+//       // Render the tiles
+//       for tile in level.tiles() {
+//         let ray = camera.ray(tile.x, tile.y, img_data.width, img_data.height);
+//         let color = match scene.intersect(&ray) {
+//           Some(itsct) => Color::from(itsct.normal),
+//           None => Color::black()
+//         };
+//         for y in tile.y..tile.y + tile.h {
+//           for x in tile.x..tile.x + tile.w {
+//             img_data.set_pixel(x, y, &color);
+//           }
+//         }
+//       }
+
+//       // Check for shutdown signal
+//       match shutdown_rx.try_recv() {
+//         Ok(_) | Err(TryRecvError::Disconnected) => { break; }
+//         Err(TryRecvError::Empty) => {}
+//       }
+
+//       // Finished one level
+//       tx.send(Event::Update).expect("Send failed");
+//     }
+//     tx.send(Event::Finish).expect("Send failed");
+//   });
+//   events_rx
+// }
+
+// pub struct EventEmitterTask(Arc<Mutex<mpsc::Receiver<Event>>>);
+
+// impl Task for EventEmitterTask {
+//   type Output = Option<Event>;
+//   type Error = String;
+//   type JsEvent = JsValue;
+
+//   /// The work performed on the `libuv` thread. First acquire a lock on
+//   /// the receiving thread and then return the received data.
+//   /// In practice, this should never need to wait for a lock since it
+//   /// should only be executed one at a time by the `EventEmitter` class.
+//   fn perform(&self) -> Result<Self::Output, Self::Error> {
+//     let rx = self
+//       .0
+//       .lock()
+//       .map_err(|_| "Could not obtain lock on receiver".to_string())?;
+
+//     // Attempt to read from the channel. Block for at most 100 ms.
+//     match rx.recv_timeout(Duration::from_millis(100)) {
+//       Ok(event) => Ok(Some(event)),
+//       Err(RecvTimeoutError::Timeout) => Ok(None),
+//       Err(RecvTimeoutError::Disconnected) => Err("Failed to receive event".to_string()),
+//     }
+//   }
+
+//   /// After the `perform` method has returned, the `complete` method is
+//   /// scheduled on the main thread. It is responsible for converting the
+//   /// Rust data structure into a JS object.
+//   fn complete(
+//     self,
+//     mut cx: TaskContext,
+//     event: Result<Self::Output, Self::Error>,
+//   ) -> JsResult<Self::JsEvent> {
+//     // Receive the event or return early with the error
+//     let event = event.or_else(|err| cx.throw_error(&err.to_string()))?;
+
+//     // Timeout occured, return early with `undefined
+//     let event = match event {
+//       Some(event) => event,
+//       None => return Ok(JsUndefined::new().upcast()),
+//     };
+
+//     // Create an empty object `{}`
+//     let o = cx.empty_object();
+
+//     // Creates an object of the shape `{ "event": string, ...data }`
+//     o.set(&mut cx, "event", match event {
+//       Event::Update => cx.string("update"),
+//       Event::Finish => cx.string("finish"),
+//     })?;
+
+//     Ok(o.upcast())
+//   }
+// }
+
+// pub struct EventEmitter {
+//   events: Arc<Mutex<mpsc::Receiver<Event>>>,
+//   shutdown: mpsc::Sender<()>,
+// }
+
+// declare_types! {
+//   pub class JsEventEmitter for EventEmitter {
+//     // Called by the `JsEventEmitter` constructor
+//     init(mut cx) {
+
+//       // Image Data
+//       let img_data: Handle<JsObject> = cx.argument::<JsObject>(0)?;
+//       let width = img_data.get(&mut cx, "width")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
+//       let height = img_data.get(&mut cx, "height")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
+//       let mut buffer = img_data.get(&mut cx, "data")?.downcast::<JsBuffer>().unwrap_or(cx.buffer(0)?);
+
+//       // Camera
+//       let camera: Handle<JsObject> = cx.argument::<JsObject>(1)?;
+//       let target = camera.get(&mut cx, "target")?.downcast::<JsObject>().unwrap_or(JsObject::new(&mut cx));
+//       let target_x = target.get(&mut cx, "x")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as f32;
+//       let target_y = target.get(&mut cx, "y")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as f32;
+//       let target_z = target.get(&mut cx, "z")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as f32;
+//       let azimuth = camera.get(&mut cx, "azimuth")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as f32;
+//       let incline = camera.get(&mut cx, "incline")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as f32;
+//       let distance = camera.get(&mut cx, "distance")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as f32;
+//       let tpc = ThirdPersonCamera {
+//         target: vec3!(target_x, target_y, target_z),
+//         azimuth,
+//         incline,
+//         distance,
+//       };
+
+//       // Scene
+//       let scene = Scene {
+//         objects: vec![
+//           RenderObject {
+//             transform: Transform {
+//               position: vec3!(0.0, 0.15, 0.0),
+//               scale: vec3!(1.0, 1.0, 1.0),
+//               rotation: Quaternion::axis_angle(vec3!(0.0, 1.0, 0.0), 3.14),
+//             },
+//             intersectable: Box::new(Sphere::new(0.3))
+//           },
+//           RenderObject {
+//             transform: Transform {
+//               position: vec3!(0.0),
+//               scale: vec3!(1.0, 1.0, 1.0),
+//               rotation: Quaternion::identity(),
+//             },
+//             intersectable: Box::new(Plane::new())
+//           }
+//         ]
+//       };
+
+//       let (shutdown, shutdown_rx) = mpsc::channel();
+
+//       let rx = {
+//         let guard = cx.lock();
+//         let data = buffer.borrow_mut(&guard);
+//         let mut slice = data.as_mut_slice::<u8>();
+//         let mut img_data = ImageData { width, height, buffer: &mut slice };
+
+//         // Start work in a separate thread
+//         event_thread(&scene, &camera, &mut img_data, shutdown_rx)
+//       }
+
+//       // Construct a new `EventEmitter` to be wrapped by the class.
+//       Ok(EventEmitter {
+//         events: Arc::new(Mutex::new(rx)),
+//         shutdown,
+//       })
+//     }
+
+//     // This method should be called by JS to receive data. It accepts a
+//     // `function (err, data)` style asynchronous callback. It may be called
+//     // in a loop, but care should be taken to only call it once at a time.
+//     method poll(mut cx) {
+//       // The callback to be executed when data is available
+//       let cb = cx.argument::<JsFunction>(0)?;
+//       let this = cx.this();
+
+//       // Create an asynchronously `EventEmitterTask` to receive data
+//       let events = cx.borrow(&this, |emitter| Arc::clone(&emitter.events));
+//       let emitter = EventEmitterTask(events);
+
+//       // Schedule the task on the `libuv` thread pool
+//       emitter.schedule(cb);
+
+//       // The `poll` method does not return any data.
+//       Ok(JsUndefined::new().upcast())
+//     }
+
+//     // The shutdown method may be called to stop the Rust thread. It
+//     // will error if the thread has already been destroyed.
+//     method shutdown(mut cx) {
+//       let this = cx.this();
+
+//       // Unwrap the shutdown channel and send a shutdown command
+//       cx.borrow(&this, |emitter| emitter.shutdown.send(()))
+//           .or_else(|err| cx.throw_error(&err.to_string()))?;
+
+//       Ok(JsUndefined::new().upcast())
+//     }
+//   }
+// }
 
 fn fill_black(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 

@@ -11,6 +11,7 @@ impl BoundingBox {
     BoundingBox { min, max }
   }
 
+  /// Arvo (1990) AABB Transform
   pub fn transform(&self, mat: Matrix4) -> Self {
     let pos = Vector3::from(mat.row(3));
     let mut bb = Self::new(pos, pos);
