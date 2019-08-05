@@ -12,9 +12,11 @@ pub mod object;
 pub mod bounded;
 
 use std::sync::mpsc::{self, RecvTimeoutError, TryRecvError};
+use std::sync::{Arc, Mutex};
+use std::thread;
 use neon::prelude::*;
 
-use math::{Vector3, Quaternion};
+use math::{Color, Vector3, Quaternion};
 use util::{ImageData, Transform};
 use scene::Scene;
 use intersectable::{Sphere, Cube, Plane};
@@ -84,46 +86,52 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
   Ok(cx.undefined())
 }
 
-// pub enum Event {
-//   Update,
-//   Finish
-// }
+pub enum Event {
+  Update,
+  Finish
+}
 
 // fn event_thread(
-//   scene: &Scene,
-//   camera: &Camera,
+//   scene: Scene,
+//   camera: Camera,
 //   img_data: &mut ImageData,
 //   shutdown_rx: mpsc::Receiver<()>
 // ) -> mpsc::Receiver<Event> {
 //   let (tx, events_rx) = mpsc::channel();
-//   thread::spawn(move || {
-//     for level in img_data.levels() {
+//   {
+//     let scene = scene.clone();
+//     let camera = camera.clone();
+//     let img_data = img_data.clone();
+//     thread::spawn(move || {
+//       for level in img_data.levels() {
 
-//       // Render the tiles
-//       for tile in level.tiles() {
-//         let ray = camera.ray(tile.x, tile.y, img_data.width, img_data.height);
-//         let color = match scene.intersect(&ray) {
-//           Some(itsct) => Color::from(itsct.normal),
-//           None => Color::black()
-//         };
-//         for y in tile.y..tile.y + tile.h {
-//           for x in tile.x..tile.x + tile.w {
-//             img_data.set_pixel(x, y, &color);
-//           }
+//         // Render the tiles
+//         for tile in level.tiles() {
+//           let ray = camera.ray(tile.x, tile.y, img_data.width, img_data.height);
+//           let color = match scene.intersect(&ray) {
+//             Some(itsct) => Color::from(itsct.normal),
+//             None => Color::black()
+//           };
+//           let color = Color::black();
+//           // for y in tile.y..tile.y + tile.h {
+//           //   for x in tile.x..tile.x + tile.w {
+//           //     img_data.set_pixel(x, y, &color);
+//           //   }
+//           // }
 //         }
-//       }
 
-//       // Check for shutdown signal
-//       match shutdown_rx.try_recv() {
-//         Ok(_) | Err(TryRecvError::Disconnected) => { break; }
-//         Err(TryRecvError::Empty) => {}
-//       }
+//         // Check for shutdown signal
+//         match shutdown_rx.try_recv() {
+//           Ok(_) | Err(TryRecvError::Disconnected) => { break; }
+//           Err(TryRecvError::Empty) => {}
+//         }
 
-//       // Finished one level
-//       tx.send(Event::Update).expect("Send failed");
-//     }
-//     tx.send(Event::Finish).expect("Send failed");
-//   });
+//         // Finished one level
+//         tx.send(Event::Update).expect("Send failed");
+//       }
+//       tx.send(Event::Finish).expect("Send failed");
+//     });
+//   }
 //   events_rx
 // }
 

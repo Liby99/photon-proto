@@ -1,6 +1,7 @@
 use ::object::Object;
 use ::util::{Ray, Intersection};
 
+#[derive(Clone)]
 pub struct Scene {
   pub objects: Vec<Object>,
 }

@@ -1,10 +1,27 @@
 use ::math::{Vector3};
 use ::util::{Ray, Intersection};
 
-pub trait Intersectable {
+pub trait Intersectable: IntersectableClone {
   fn intersect(&self, ray: &Ray) -> Option<Intersection>;
 }
 
+pub trait IntersectableClone {
+  fn box_clone(&self) -> Box<Intersectable>;
+}
+
+impl<T> IntersectableClone for T where T: 'static + Intersectable + Clone {
+  fn box_clone(&self) -> Box<Intersectable> {
+    Box::new(self.clone())
+  }
+}
+
+impl Clone for Box<Intersectable> {
+  fn clone(&self) -> Self {
+    self.box_clone()
+  }
+}
+
+#[derive(Clone)]
 pub struct Cube {
   pub size_x: f32,
   pub size_y: f32,
@@ -53,6 +70,7 @@ impl Intersectable for Cube {
   }
 }
 
+#[derive(Clone)]
 pub struct Plane;
 
 impl Plane {
@@ -80,6 +98,7 @@ impl Intersectable for Plane {
   }
 }
 
+#[derive(Clone)]
 pub struct Sphere {
   pub radius: f32,
 }

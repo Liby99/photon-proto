@@ -9,7 +9,7 @@ pub struct ThirdPersonCamera {
   pub distance: f32,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Camera {
   pub position: Vector3,
   pub forward: Vector3,

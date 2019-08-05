@@ -1,6 +1,7 @@
 use ::intersectable::Intersectable;
 use ::util::{Transform, Ray, Intersection};
 
+#[derive(Clone)]
 pub struct Object {
   pub transform: Transform,
   pub intersectable: Box<dyn Intersectable>,
