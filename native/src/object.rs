@@ -4,7 +4,7 @@ use ::util::{Transform, Ray, Intersection};
 #[derive(Clone)]
 pub struct Object {
   pub transform: Transform,
-  pub intersectable: Box<dyn Intersectable>,
+  pub intersectable: Box<dyn Intersectable + Send>,
 }
 
 impl Object {
