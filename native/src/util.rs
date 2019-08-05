@@ -81,6 +81,31 @@ impl<'a> ImageData<'a> {
   }
 }
 
+pub struct ImageDimension {
+  pub width: usize,
+  pub height: usize,
+}
+
+impl ImageDimension {
+  pub fn levels(&self) -> ImageLevelIter {
+    ImageLevelIter {
+      tile_size: 64,
+      is_init: true,
+      width: self.width,
+      height: self.height,
+    }
+  }
+}
+
+impl<'a> From<ImageData<'a>> for ImageDimension {
+  fn from(img_data: ImageData<'a>) -> Self {
+    Self {
+      width: img_data.width,
+      height: img_data.height,
+    }
+  }
+}
+
 pub struct ImageLevel {
   pub tile_size: usize,
   pub is_init: bool,

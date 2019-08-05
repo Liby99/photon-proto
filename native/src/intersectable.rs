@@ -6,16 +6,16 @@ pub trait Intersectable: IntersectableClone {
 }
 
 pub trait IntersectableClone {
-  fn box_clone(&self) -> Box<Intersectable>;
+  fn box_clone(&self) -> Box<dyn Intersectable>;
 }
 
-impl<T> IntersectableClone for T where T: 'static + Intersectable + Clone {
-  fn box_clone(&self) -> Box<Intersectable> {
+impl<T> IntersectableClone for T where T: 'static + Intersectable + Clone + Send {
+  fn box_clone(&self) -> Box<dyn Intersectable> {
     Box::new(self.clone())
   }
 }
 
-impl Clone for Box<Intersectable> {
+impl Clone for Box<dyn Intersectable> {
   fn clone(&self) -> Self {
     self.box_clone()
   }
