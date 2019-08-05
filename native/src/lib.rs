@@ -87,6 +87,13 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 }
 
 pub enum Event {
+  SetPixels {
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+    color: Color,
+  },
   Update,
   Finish
 }
@@ -98,38 +105,37 @@ fn event_thread(
   shutdown_rx: mpsc::Receiver<()>
 ) -> mpsc::Receiver<Event> {
   let (tx, events_rx) = mpsc::channel();
-  {
-    let scene = Arc::new(Mutex::new(scene));
-    thread::spawn(move || {
-      for level in img_dim.levels() {
+  thread::spawn(move || {
+    for level in img_dim.levels() {
 
-        // Render the tiles
-        for tile in level.tiles() {
-          let ray = camera.ray(tile.x, tile.y, img_dim.width, img_dim.height);
-          let color = match scene.lock().unwrap().intersect(&ray) {
-            Some(itsct) => Color::from(itsct.normal),
-            None => Color::black()
-          };
-          // let color = Color::black();
-          // for y in tile.y..tile.y + tile.h {
-          //   for x in tile.x..tile.x + tile.w {
-          //     img_dim.set_pixel(x, y, &color);
-          //   }
-          // }
-        }
-
-        // Check for shutdown signal
-        match shutdown_rx.try_recv() {
-          Ok(_) | Err(TryRecvError::Disconnected) => { break; }
-          Err(TryRecvError::Empty) => {}
-        }
-
-        // Finished one level
-        tx.send(Event::Update).expect("Send failed");
+      // Render the tiles
+      for tile in level.tiles() {
+        let ray = camera.ray(tile.x, tile.y, img_dim.width, img_dim.height);
+        // let color = match scene.lock().unwrap().intersect(&ray) {
+        let color = match scene.intersect(&ray) {
+          Some(itsct) => Color::from(itsct.normal),
+          None => Color::black()
+        };
+        tx.send(Event::SetPixels {
+          x: tile.x,
+          y: tile.y,
+          w: tile.w,
+          h: tile.h,
+          color
+        }).expect("Send failed");
       }
-      tx.send(Event::Finish).expect("Send failed");
-    });
-  }
+
+      // Check for shutdown signal
+      match shutdown_rx.try_recv() {
+        Ok(_) | Err(TryRecvError::Disconnected) => { break; }
+        Err(TryRecvError::Empty) => {}
+      }
+
+      // Finished one level
+      tx.send(Event::Update).expect("Send failed");
+    }
+    tx.send(Event::Finish).expect("Send failed");
+  });
   events_rx
 }
 
