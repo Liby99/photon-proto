@@ -124,6 +124,7 @@ fn event_thread(
           h: tile.h,
           color
         }).expect("Send failed");
+        // println!("Setting pixels {}, {}, {}, {}", tile.x, tile.y, tile.w, tile.h);
       }
 
       // Check for shutdown signal
@@ -134,8 +135,10 @@ fn event_thread(
 
       // Finished one level
       tx.send(Event::Update).expect("Send failed");
+      // println!("Updating");
     }
     tx.send(Event::Finish).expect("Send failed");
+    // println!("Finished");
   });
   events_rx
 }
