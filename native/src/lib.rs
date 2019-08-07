@@ -87,6 +87,7 @@ fn render(mut cx: FunctionContext) -> JsResult<JsUndefined> {
   Ok(cx.undefined())
 }
 
+#[derive(Debug)]
 pub enum Event {
   SetPixels {
     x: usize,
@@ -241,7 +242,7 @@ declare_types! {
       let img_data: Handle<JsObject> = cx.argument::<JsObject>(0)?;
       let width = img_data.get(&mut cx, "width")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
       let height = img_data.get(&mut cx, "height")?.downcast::<JsNumber>().unwrap_or(cx.number(0)).value() as usize;
-      let mut buffer = img_data.get(&mut cx, "data")?.downcast::<JsBuffer>().unwrap_or(cx.buffer(0)?);
+      // let mut buffer = img_data.get(&mut cx, "data")?.downcast::<JsBuffer>().unwrap_or(cx.buffer(0)?);
 
       // Set this
       // let this = cx.this();

@@ -49,10 +49,10 @@ $canvas.mouseup(() => {
 function startRenderStream() {
   // if (stream) stream.close();
   stream = Photon.createRenderStream(imgData, (event) => {
-    if (event.type === "update") {
-      console.log("Receiving update event");
-      context.putImageData(imgData, 0, 0);
-    }
+    // if (event.type === "update") {
+    console.log(`Receiving ${event.type} event`);
+    context.putImageData(imgData, 0, 0);
+    // }
   });
 }
 
