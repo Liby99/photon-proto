@@ -16,6 +16,13 @@ const { width, height } = canvas;
 const context = canvas.getContext("2d");
 const imgData = context.createImageData(width, height);
 
+$("#stop-button").click(() => {
+  if (stream) {
+    stream.close();
+    stream = undefined;
+  }
+})
+
 $canvas.mousedown((event) => {
   mouseDown = true;
   currX = event.screenX;
@@ -37,8 +44,11 @@ $canvas.mousemove((event) => {
     currX = nextX;
     currY = nextY;
 
-    stream.close();
-    startRenderStream();
+    // if (stream) {
+    //   stream.close();
+    //   stream = undefined;
+    // }
+    // startRenderStream();
   }
 });
 
@@ -47,24 +57,11 @@ $canvas.mouseup(() => {
 });
 
 function startRenderStream() {
-  // if (stream) stream.close();
   stream = Photon.createRenderStream(imgData, (event) => {
-    // if (event.type === "update") {
-    console.log(`Receiving ${event.type} event`);
-    context.putImageData(imgData, 0, 0);
-    // }
+    if (event.type === "update") {
+      context.putImageData(imgData, 0, 0);
+    }
   });
 }
 
 startRenderStream();
-
-// setInterval(() => {
-
-//   // Update camera data
-//   Photon.mainCamera.azimuth = azimuth;
-//   Photon.mainCamera.incline = incline;
-
-//   // Render the scene and put it on the context
-//   Photon.render(imgData);
-//   context.putImageData(imgData, 0, 0);
-// }, 250); // Render the screen every 5 secs;
